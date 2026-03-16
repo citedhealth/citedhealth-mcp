@@ -50,7 +50,7 @@ strict = true
 testpaths = ["tests"]
 
 [dependency-groups]
-dev = ["pytest>=8.0", "ruff>=0.9", "mypy>=1.14", "anyio[trio]>=4.0"]
+dev = ["pytest>=8.0", "anyio[trio]>=4.0", "ruff>=0.9", "mypy>=1.14"]
 
 [tool.uv.sources]
 citedhealth = { path = "../citedhealth-python", editable = true }

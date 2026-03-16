@@ -11,7 +11,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from citedhealth import AsyncCitedHealth
-from citedhealth.exceptions import NotFoundError
+from citedhealth.exceptions import CitedHealthError, NotFoundError, RateLimitError
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP(
@@ -19,13 +19,18 @@ mcp = FastMCP(
     instructions="Query evidence-based supplement data from citedhealth.com",
 )
 
-_BASE_URL = os.environ.get("CITEDHEALTH_BASE_URL", "https://citedhealth.com")
-
 
 @asynccontextmanager
 async def _get_client() -> AsyncIterator[AsyncCitedHealth]:
-    async with AsyncCitedHealth(base_url=_BASE_URL) as client:
+    base_url = os.environ.get("CITEDHEALTH_BASE_URL", "https://citedhealth.com")
+    async with AsyncCitedHealth(base_url=base_url) as client:
         yield client
+
+
+def _api_error(err: CitedHealthError) -> str:
+    if isinstance(err, RateLimitError):
+        return f"Rate limited. Please retry after {err.retry_after} seconds."
+    return f"API error: {err}"
 
 
 @mcp.tool()
@@ -36,8 +41,11 @@ async def search_ingredients(query: str = "", category: str = "") -> str:
         query: Search term (e.g. "biotin", "vitamin")
         category: Filter by category (vitamins, herbs, minerals, amino_acids)
     """
-    async with _get_client() as client:
-        results = await client.search_ingredients(query=query, category=category)
+    try:
+        async with _get_client() as client:
+            results = await client.search_ingredients(query=query, category=category)
+    except CitedHealthError as e:
+        return _api_error(e)
 
     if not results:
         return "No ingredients found."
@@ -60,11 +68,13 @@ async def get_ingredient(slug: str) -> str:
     Args:
         slug: Ingredient slug (e.g. "biotin", "melatonin", "saw-palmetto")
     """
-    async with _get_client() as client:
-        try:
+    try:
+        async with _get_client() as client:
             ing = await client.get_ingredient(slug)
-        except NotFoundError:
-            return f"Ingredient not found: {slug}"
+    except NotFoundError:
+        return f"Ingredient not found: {slug}"
+    except CitedHealthError as e:
+        return _api_error(e)
 
     lines = [
         f"# {ing.name}",
@@ -90,11 +100,13 @@ async def search_evidence(ingredient: str, condition: str) -> str:
         ingredient: Ingredient slug (e.g. "biotin")
         condition: Condition slug (e.g. "hair-loss")
     """
-    async with _get_client() as client:
-        try:
+    try:
+        async with _get_client() as client:
             ev = await client.get_evidence(ingredient, condition)
-        except NotFoundError:
-            return f"No evidence found for {ingredient} \u00d7 {condition}."
+    except NotFoundError:
+        return f"No evidence found for {ingredient} \u00d7 {condition}."
+    except CitedHealthError as e:
+        return _api_error(e)
 
     lines = [
         f"# {ev.ingredient.name} for {ev.condition.name}",
@@ -117,11 +129,13 @@ async def get_evidence(pk: int) -> str:
     Args:
         pk: Evidence link ID (integer)
     """
-    async with _get_client() as client:
-        try:
+    try:
+        async with _get_client() as client:
             ev = await client.get_evidence_by_id(pk)
-        except NotFoundError:
-            return f"Evidence link not found: {pk}"
+    except NotFoundError:
+        return f"Evidence link not found: {pk}"
+    except CitedHealthError as e:
+        return _api_error(e)
 
     return (
         f"# {ev.ingredient.name} for {ev.condition.name}\n\n"
@@ -140,8 +154,11 @@ async def search_papers(query: str = "", year: int | None = None) -> str:
         query: Search in paper title (e.g. "melatonin sleep")
         year: Filter by publication year (e.g. 2024)
     """
-    async with _get_client() as client:
-        results = await client.search_papers(query=query, year=year)
+    try:
+        async with _get_client() as client:
+            results = await client.search_papers(query=query, year=year)
+    except CitedHealthError as e:
+        return _api_error(e)
 
     if not results:
         return "No papers found."
@@ -151,8 +168,7 @@ async def search_papers(query: str = "", year: int | None = None) -> str:
         oa = " \U0001f513" if p.is_open_access else ""
         lines.append(f"- **{p.title}**{oa}")
         lines.append(f"  PMID: {p.pmid} | {p.journal} ({p.publication_year})")
-        if p.citation_count:
-            lines.append(f"  Citations: {p.citation_count}")
+        lines.append(f"  Citations: {p.citation_count}")
     return "\n".join(lines)
 
 
@@ -163,11 +179,13 @@ async def get_paper(pmid: str) -> str:
     Args:
         pmid: PubMed ID (e.g. "12345678")
     """
-    async with _get_client() as client:
-        try:
+    try:
+        async with _get_client() as client:
             p = await client.get_paper(pmid)
-        except NotFoundError:
-            return f"Paper not found: PMID {pmid}"
+    except NotFoundError:
+        return f"Paper not found: PMID {pmid}"
+    except CitedHealthError as e:
+        return _api_error(e)
 
     lines = [
         f"# {p.title}",
