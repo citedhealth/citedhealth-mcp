@@ -31,7 +31,7 @@ class TestMCPToolsExist:
     def test_mcp_server_name(self) -> None:
         from citedhealth_mcp.server import mcp
 
-        assert mcp.name == "CITED Health"
+        assert mcp.name == "citedhealth"
 
 
 class TestSearchIngredientsTool:

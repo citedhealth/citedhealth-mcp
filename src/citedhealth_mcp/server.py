@@ -15,7 +15,7 @@ from citedhealth.exceptions import NotFoundError
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP(
-    "CITED Health",
+    "citedhealth",
     instructions="Query evidence-based supplement data from citedhealth.com",
 )
 
