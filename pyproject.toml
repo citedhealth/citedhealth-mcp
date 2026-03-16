@@ -1,0 +1,56 @@
+[project]
+name = "citedhealth-mcp"
+version = "0.2.0"
+description = "MCP server for CITED Health — query supplement evidence from Claude, Cursor, and Windsurf"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+authors = [{ name = "Cited Health Inc.", email = "dev@citedhealth.com" }]
+keywords = ["mcp", "supplements", "evidence", "health", "claude", "cursor"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+]
+dependencies = [
+    "citedhealth>=0.2.0",
+    "mcp[cli]>=1.0,<2.0",
+]
+
+[project.scripts]
+citedhealth-mcp = "citedhealth_mcp:main"
+
+[project.urls]
+Homepage = "https://citedhealth.com"
+Repository = "https://github.com/citedhealth/mcp"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/citedhealth_mcp"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[dependency-groups]
+dev = ["pytest>=8.0", "ruff>=0.9", "mypy>=1.14", "anyio[trio]>=4.0"]
+
+[tool.uv.sources]
+citedhealth = { path = "../citedhealth-python", editable = true }
