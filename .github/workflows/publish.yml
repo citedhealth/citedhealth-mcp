@@ -7,6 +7,9 @@ on:
 permissions:
   id-token: write
 
+env:
+  UV_NO_SOURCES: "1"
+
 jobs:
   publish:
     runs-on: ubuntu-latest
@@ -14,5 +17,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-      - run: UV_NO_SOURCES=1 uv build
+      - run: uv build
       - run: uv publish --trusted-publishing always
