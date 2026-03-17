@@ -134,15 +134,22 @@ CITED Health uses an A-F grading system based on the quality and consistency of 
 |----------|---------|-------------|
 | `CITEDHEALTH_BASE_URL` | `https://citedhealth.com` | Override API base URL (for testing or self-hosted) |
 
+## Learn More About Evidence-Based Supplements
+
+- **Tools**: [Evidence Checker](https://citedhealth.com/evidence/) · [Ingredient Browser](https://citedhealth.com/) · [Paper Search](https://citedhealth.com/papers/)
+- **Browse**: [Hair Health](https://haircited.com) · [Sleep Health](https://sleepcited.com) · [All Ingredients](https://citedhealth.com/api/ingredients/)
+- **Guides**: [Grading Methodology](https://citedhealth.com/editorial-policy/) · [Medical Disclaimer](https://citedhealth.com/medical-disclaimer/)
+- **API**: [REST API Docs](https://citedhealth.com/developers/) · [OpenAPI Spec](https://citedhealth.com/api/openapi.json)
+
 ## Also Available
 
-| Package | Install | Description |
-|---------|---------|-------------|
-| **citedhealth-mcp** | `pip install citedhealth-mcp` | This package — MCP server for AI assistants |
-| **citedhealth** | `pip install citedhealth` | Python client for direct API access |
-
-- [CITED Health API Docs](https://citedhealth.com/developers/)
-- [OpenAPI Spec](https://citedhealth.com/api/openapi.json)
+| Platform | Install | Link |
+|----------|---------|------|
+| **PyPI** | `pip install citedhealth` | [PyPI](https://pypi.org/project/citedhealth/) |
+| **npm** | `npm install citedhealth` | [npm](https://www.npmjs.com/package/citedhealth) |
+| **Go** | `go get github.com/citedhealth/citedhealth-go` | [pkg.go.dev](https://pkg.go.dev/github.com/citedhealth/citedhealth-go) |
+| **Rust** | `cargo add citedhealth` | [crates.io](https://crates.io/crates/citedhealth) |
+| **Ruby** | `gem install citedhealth` | [RubyGems](https://rubygems.org/gems/citedhealth) |
 
 ## License
 
