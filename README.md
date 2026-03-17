@@ -8,6 +8,10 @@ MCP server for [CITED Health](https://citedhealth.com) — query evidence-based 
 
 > **Browse the evidence at [citedhealth.com](https://citedhealth.com)** — grades for 74 ingredients, 30 conditions, and 2,881 PubMed papers.
 
+<p align="center">
+  <img src="demo.gif" alt="citedhealth-mcp demo — MCP server for evidence-based supplement research data in Claude, Cursor, and Windsurf" width="800">
+</p>
+
 ## Table of Contents
 
 - [Install](#install)
