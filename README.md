@@ -1,15 +1,16 @@
 # citedhealth-mcp
 
-[![PyPI](https://img.shields.io/pypi/v/citedhealth-mcp)](https://pypi.org/project/citedhealth-mcp/)
+[![PyPI version](https://agentgif.com/badge/pypi/citedhealth-mcp/version.svg)](https://pypi.org/project/citedhealth-mcp/)
 [![Python](https://img.shields.io/pypi/pyversions/citedhealth-mcp)](https://pypi.org/project/citedhealth-mcp/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://agentgif.com/badge/github/citedhealth/citedhealth-mcp/stars.svg)](https://github.com/citedhealth/citedhealth-mcp)
 
 MCP server for [CITED Health](https://citedhealth.com) — query evidence-based supplement data directly from Claude, Cursor, and Windsurf. Ask your AI assistant about ingredient evidence grades, PubMed papers, and health conditions backed by peer-reviewed research.
 
 > **Browse the evidence at [citedhealth.com](https://citedhealth.com)** — grades for 74 ingredients, 30 conditions, and 2,881 PubMed papers.
 
 <p align="center">
-  <img src="demo.gif" alt="citedhealth-mcp demo — MCP server for evidence-based supplement research data in Claude, Cursor, and Windsurf" width="800">
+  <a href="https://agentgif.com/kwnGatGH"><img src="https://media.agentgif.com/kwnGatGH.gif" alt="citedhealth-mcp demo — MCP server for evidence-based supplement research data in Claude, Cursor, and Windsurf" width="800"></a>
 </p>
 
 ## Table of Contents
