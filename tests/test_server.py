@@ -5,11 +5,11 @@ from __future__ import annotations
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from citedhealth.models import Condition, EvidenceLink, Ingredient, NestedIngredient, Paper
+from citedhealth.models import Condition, EvidenceLink, GlossaryTerm, Guide, Ingredient, NestedIngredient, Paper
 
 
 class TestMCPToolsExist:
-    """Verify all 6 tools are registered on the MCP server."""
+    """Verify all 12 tools are registered on the MCP server."""
 
     def test_server_has_tools(self) -> None:
         from citedhealth_mcp.server import mcp
@@ -22,11 +22,17 @@ class TestMCPToolsExist:
         assert "get_evidence" in tool_names
         assert "search_papers" in tool_names
         assert "get_paper" in tool_names
+        assert "list_conditions" in tool_names
+        assert "get_condition" in tool_names
+        assert "list_glossary" in tool_names
+        assert "get_glossary_term" in tool_names
+        assert "list_guides" in tool_names
+        assert "get_guide" in tool_names
 
-    def test_exactly_six_tools(self) -> None:
+    def test_exactly_twelve_tools(self) -> None:
         from citedhealth_mcp.server import mcp
 
-        assert len(mcp._tool_manager._tools) == 6
+        assert len(mcp._tool_manager._tools) == 12
 
     def test_mcp_server_name(self) -> None:
         from citedhealth_mcp.server import mcp
@@ -352,3 +358,248 @@ class TestGetPaperTool:
 
         assert "not found" in result.lower()
         assert "99999999" in result
+
+
+class TestListConditionsTool:
+    @pytest.mark.anyio
+    async def test_returns_conditions_list(self) -> None:
+        mock_client = AsyncMock()
+        mock_client.list_conditions.return_value = [
+            Condition(slug="hair-loss", name="Hair Loss", prevalence="50% of men by age 50", is_featured=True),
+            Condition(slug="insomnia", name="Insomnia"),
+        ]
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import list_conditions
+
+            result = await list_conditions()
+
+        assert "Hair Loss" in result
+        assert "Insomnia" in result
+        assert "\u2605" in result  # featured marker
+        assert "50% of men" in result
+
+    @pytest.mark.anyio
+    async def test_returns_no_results_message(self) -> None:
+        mock_client = AsyncMock()
+        mock_client.list_conditions.return_value = []
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import list_conditions
+
+            result = await list_conditions()
+
+        assert "No conditions found" in result
+
+
+class TestGetConditionTool:
+    @pytest.mark.anyio
+    async def test_returns_condition_detail(self) -> None:
+        mock_client = AsyncMock()
+        mock_client.get_condition.return_value = Condition(
+            slug="hair-loss",
+            name="Hair Loss",
+            description="Progressive thinning of hair",
+            prevalence="50% of men by age 50",
+            symptoms=["thinning", "receding hairline"],
+            risk_factors=["genetics", "stress"],
+        )
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import get_condition
+
+            result = await get_condition(slug="hair-loss")
+
+        assert "Hair Loss" in result
+        assert "thinning" in result
+        assert "genetics" in result
+
+    @pytest.mark.anyio
+    async def test_not_found_returns_message(self) -> None:
+        from citedhealth.exceptions import NotFoundError
+
+        mock_client = AsyncMock()
+        mock_client.get_condition.side_effect = NotFoundError("condition", "unknown")
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import get_condition
+
+            result = await get_condition(slug="unknown")
+
+        assert "not found" in result.lower()
+
+
+class TestListGlossaryTool:
+    @pytest.mark.anyio
+    async def test_returns_glossary_list(self) -> None:
+        mock_client = AsyncMock()
+        mock_client.list_glossary.return_value = [
+            GlossaryTerm(
+                slug="rct", term="Randomized Controlled Trial", abbreviation="RCT", short_definition="A study design."
+            ),
+            GlossaryTerm(slug="bioavailability", term="Bioavailability", short_definition="The proportion absorbed."),
+        ]
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import list_glossary
+
+            result = await list_glossary()
+
+        assert "Randomized Controlled Trial" in result
+        assert "(RCT)" in result
+        assert "Bioavailability" in result
+
+    @pytest.mark.anyio
+    async def test_returns_no_results_message(self) -> None:
+        mock_client = AsyncMock()
+        mock_client.list_glossary.return_value = []
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import list_glossary
+
+            result = await list_glossary()
+
+        assert "No glossary terms found" in result
+
+
+class TestGetGlossaryTermTool:
+    @pytest.mark.anyio
+    async def test_returns_term_detail(self) -> None:
+        mock_client = AsyncMock()
+        mock_client.get_glossary_term.return_value = GlossaryTerm(
+            slug="rct",
+            term="Randomized Controlled Trial",
+            abbreviation="RCT",
+            category="research",
+            definition="A study design that randomly assigns participants.",
+        )
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import get_glossary_term
+
+            result = await get_glossary_term(slug="rct")
+
+        assert "Randomized Controlled Trial" in result
+        assert "RCT" in result
+        assert "research" in result
+        assert "randomly assigns" in result
+
+    @pytest.mark.anyio
+    async def test_not_found_returns_message(self) -> None:
+        from citedhealth.exceptions import NotFoundError
+
+        mock_client = AsyncMock()
+        mock_client.get_glossary_term.side_effect = NotFoundError("glossary", "unknown")
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import get_glossary_term
+
+            result = await get_glossary_term(slug="unknown")
+
+        assert "not found" in result.lower()
+
+
+class TestListGuidesTool:
+    @pytest.mark.anyio
+    async def test_returns_guides_list(self) -> None:
+        mock_client = AsyncMock()
+        mock_client.list_guides.return_value = [
+            Guide(
+                slug="biotin-for-hair",
+                title="Biotin for Hair Growth",
+                category="hair",
+                meta_description="Complete guide.",
+            ),
+        ]
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import list_guides
+
+            result = await list_guides()
+
+        assert "Biotin for Hair Growth" in result
+        assert "[hair]" in result
+        assert "Complete guide" in result
+
+    @pytest.mark.anyio
+    async def test_returns_no_results_message(self) -> None:
+        mock_client = AsyncMock()
+        mock_client.list_guides.return_value = []
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import list_guides
+
+            result = await list_guides()
+
+        assert "No guides found" in result
+
+
+class TestGetGuideTool:
+    @pytest.mark.anyio
+    async def test_returns_guide_detail(self) -> None:
+        mock_client = AsyncMock()
+        mock_client.get_guide.return_value = Guide(
+            slug="biotin-for-hair",
+            title="Biotin for Hair Growth",
+            category="hair",
+            content="Biotin (vitamin B7) is essential for hair health.",
+        )
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import get_guide
+
+            result = await get_guide(slug="biotin-for-hair")
+
+        assert "Biotin for Hair Growth" in result
+        assert "vitamin B7" in result
+        assert "hair" in result
+
+    @pytest.mark.anyio
+    async def test_not_found_returns_message(self) -> None:
+        from citedhealth.exceptions import NotFoundError
+
+        mock_client = AsyncMock()
+        mock_client.get_guide.side_effect = NotFoundError("guide", "unknown")
+        mock_ctx = MagicMock()
+        mock_ctx.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_ctx.__aexit__ = AsyncMock(return_value=False)
+
+        with patch("citedhealth_mcp.server._get_client", return_value=mock_ctx):
+            from citedhealth_mcp.server import get_guide
+
+            result = await get_guide(slug="unknown")
+
+        assert "not found" in result.lower()

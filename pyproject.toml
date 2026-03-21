@@ -1,6 +1,6 @@
 [project]
 name = "citedhealth-mcp"
-version = "0.2.0"
+version = "0.4.0"
 description = "MCP server for CITED Health — query supplement evidence from Claude, Cursor, and Windsurf"
 readme = "README.md"
 license = "MIT"
@@ -17,7 +17,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
 ]
 dependencies = [
-    "citedhealth>=0.2.0",
+    "citedhealth>=0.4.0",
     "mcp[cli]>=1.0,<2.0",
 ]
 
