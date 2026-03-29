@@ -197,6 +197,17 @@ Set `CITEDHEALTH_BASE_URL` to query data from any of the 6 CITED Health domains:
 | **Rust** | `cargo add citedhealth` | [crates.io](https://crates.io/crates/citedhealth) |
 | **Ruby** | `gem install citedhealth` | [RubyGems](https://rubygems.org/gems/citedhealth) |
 
+## Embed Widget
+
+Embed [CitedHealth](https://citedhealth.com) widgets on any website with [citedhealth-embed](https://widget.citedhealth.com):
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/citedhealth-embed@1/dist/embed.min.js"></script>
+<div data-citedhealth="entity" data-slug="example"></div>
+```
+
+Zero dependencies · Shadow DOM · 4 themes (light/dark/sepia/auto) · [Widget docs](https://widget.citedhealth.com)
+
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
